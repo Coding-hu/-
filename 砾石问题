@@ -1,0 +1,200 @@
+import javafx.application.Application;
+import javafx.event.EventHandler;
+import javafx.geometry.HPos;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.stage.Stage;
+import javafx.scene.control.TextField;
+import java.util.*;
+
+
+
+public class Main extends Application {
+    private int num, i=1, j=1, k;
+    private int[][] set = new int[100][2];
+    private Button button1;
+    private Text textField1;
+    private String s = "现在所有砾石颜色未知";
+
+    //根据每次交换后的结果画出圆与颜色函数
+    public void paint(int[][] a, Stage primaryStage) {
+        Pane pane = new Pane();
+        Scene scene1 = new Scene(pane, 700, 400, Color.WHITE);
+
+        Circle circle = new Circle();  //画圆工具，代表砾石
+        circle.setRadius(scene1.getWidth() / (num * 2));  //圆的半径
+        circle.setCenterX(scene1.getWidth() / (num * 2)); //圆的圆心
+        circle.setStroke(Color.BLACK);
+        if (a[1][0] == 1 && a[1][1] == 1) {   //1为红色
+            circle.setFill(Color.RED);
+        }
+        if (a[1][0] == 2 && a[1][1] == 1) {   //2为白色
+            circle.setFill(Color.WHITE);
+        }
+        if (a[1][0] == 3 && a[1][1] == 1) {   //3为蓝色
+            circle.setFill(Color.BLUE);
+        }
+        if (a[1][1] == 0) {                 //未知颜色记为黑
+            circle.setFill(Color.BLACK);
+        }
+        circle.setCenterY(scene1.getHeight() / 2);
+        pane.getChildren().add(circle);
+
+        int sumOfCircle = 1; //圆的数量
+        while (sumOfCircle < num) {
+            Circle circle1 = new Circle();
+            circle1.setRadius(scene1.getWidth() / (num * 2));
+            circle1.setCenterX(scene1.getWidth() / (num * 2) + sumOfCircle * (scene1.getWidth() / num));
+            circle1.setCenterY(scene1.getHeight() / 2);
+            circle1.setStroke(Color.BLACK);
+            if (a[sumOfCircle + 1][0] == 1 && a[sumOfCircle + 1][1] == 1) {   //1为红色
+                circle1.setFill(Color.RED);
+            }
+            if (a[sumOfCircle + 1][0] == 2 && a[sumOfCircle + 1][1] == 1) {   //2为白色
+                circle1.setFill(Color.WHITE);
+            }
+            if (a[sumOfCircle + 1][0] == 3 && a[sumOfCircle + 1][1] == 1) {   //3为蓝色
+                circle1.setFill(Color.BLUE);
+            }
+            if (a[sumOfCircle + 1][1] == 0) {
+                circle1.setFill(Color.BLACK);
+            }
+            pane.getChildren().add(circle1);
+            sumOfCircle++;
+        }
+
+        textField1 = new Text();
+        textField1.setText(s);
+        textField1.setFont(new Font("Arial",15));
+        textField1.setX(100);
+        textField1.setY(50);
+        pane.getChildren().add(textField1);
+
+
+        button1 = new Button("下一步");
+        button1.setLayoutX(570);
+        button1.setLayoutY(320);
+        pane.getChildren().add(button1);
+
+        primaryStage.setScene(scene1);
+        primaryStage.show();
+
+
+    }
+    //多次启动show函数来实现动态展示过程
+    public void change(Stage primaryStage) {
+        paint(set,primaryStage);  //全部未知颜色记为黑色
+        show(primaryStage);
+    }
+   //每次交换后将交换的数据传给paint函数进京绘图
+    public void show(Stage primaryStage){
+        button1.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                if (j <= k) {
+                    if (set[j][0] == 1) {
+                        set[j][1] = 1; //标记已看
+                        int temp = set[j][0];
+                        set[j][0] = set[i][0];   //内容交换
+                        set[i][0] = temp;
+                        int temp1 = set[j][1];
+                        set[j][1] = set[i][1];  //标记交换
+                        set[i][1] = temp1;
+                        s = "此时第" + j + "位为红色，与第" + i + "位交换后的结果为:(黑色代表砾石颜色未知)";
+                        i++;
+                        j++;   //交换过程
+
+
+                    } else if (set[j][0] == 2) {
+                        set[j][1] = 1;
+                        s = "此时第" + j + "位为白色，不需要交换(黑色代表砾石颜色未知)";
+                        j++;   //交换过程
+
+                    } else {
+                        set[j][1] = 1;
+                        s = "此时第" + j + "位为蓝色，与第" + k + "位交换后的结果为:(黑色代表砾石颜色未知)";
+                        int temp = set[j][0];
+                        set[j][0] = set[k][0];  //内容交换
+                        set[k][0] = temp;
+                        int temp1 = set[j][1];
+                        set[j][1] = set[k][1]; //标记交换
+                        set[k][1] = temp1;
+                        k=k-1;
+                    }
+
+                    paint(set,primaryStage);
+                    change(primaryStage);
+                }else {
+                    s="已完全交换排序";
+                    paint(set,primaryStage);
+                    return;
+                }
+            }
+        });
+
+    }
+
+    @Override
+    public void start(Stage primaryStage) {
+        BorderPane borderPane = new BorderPane();
+        Scene scene = new Scene(borderPane, 300, 150, Color.WHITE);
+        //设计数量输入好界面
+        GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(5));
+        gridPane.setHgap(5);
+        gridPane.setVgap(5);
+        ColumnConstraints column1 = new ColumnConstraints(100);
+        gridPane.getColumnConstraints().add(column1);
+
+
+        Label label = new Label("请输入砾石的数量:");
+        TextField textField = new TextField();
+        Button button = new Button("确认");
+
+
+        GridPane.setHalignment(label, HPos.RIGHT);
+        gridPane.add(label, 0, 0);
+
+        GridPane.setHalignment(textField, HPos.LEFT);
+        gridPane.add(textField, 1, 0);
+
+        GridPane.setHalignment(button, HPos.RIGHT);
+        gridPane.add(button, 1, 1);
+
+        borderPane.setCenter(gridPane);
+        primaryStage.setScene(scene);
+        primaryStage.show();
+
+
+        //点击确认按钮后需要做的事情
+        button.setOnAction(actionEvent -> {
+            String str = textField.getText();
+            num = Integer.parseInt(str); //获取砾石的数量
+            k=num;
+            primaryStage.close();
+            Random random = new Random();
+
+            String[] color = {"Black", "Red", "White", "Blue"}; //砾石的颜色
+            for (int i = 1; i <= num; i++) {
+                set[i][0] = random.nextInt(3) + 1;
+                set[i][1] = 0;   //第二维为 0表示未看，为1表示已经观看砾石颜色
+            }
+            change(primaryStage);
+
+        });
+    }
+        public static void main (String[]args){
+            launch(args);
+        }
+    }
+
+
+
